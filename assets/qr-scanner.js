@@ -44,9 +44,9 @@
     copyBtn.disabled = false;
 
     if (isProbablyUrl(normalized)) {
-      setStatus('已识别到二维码链接，可以复制。', 'success');
+      setStatus('识别成功，已为你准备好可复制的链接。', 'success');
     } else {
-      setStatus('已识别到二维码内容，但内容不是标准 http/https 链接。按钮会复制原始内容。', 'warning');
+      setStatus('已识别二维码内容。它不是网页链接，但你仍可直接复制原文。', 'warning');
     }
   }
 
@@ -108,7 +108,7 @@
 
   async function startCamera() {
     if (!navigator.mediaDevices?.getUserMedia) {
-      throw new Error('当前浏览器不支持摄像头调用。请使用最新版 Safari、Chrome、Edge 或 Firefox。');
+      throw new Error('当前浏览器暂不支持调用摄像头，请换用新版 Safari、Chrome、Edge 或 Firefox。');
     }
 
     return navigator.mediaDevices.getUserMedia({
@@ -123,7 +123,7 @@
 
   async function startScreenShare() {
     if (!navigator.mediaDevices?.getDisplayMedia) {
-      throw new Error('当前浏览器不支持屏幕共享 API。请在桌面端 Chrome、Edge 或 Firefox 中打开。');
+      throw new Error('当前浏览器暂不支持屏幕共享，请在桌面版 Chrome、Edge 或 Firefox 中使用。');
     }
 
     return navigator.mediaDevices.getDisplayMedia({
@@ -138,7 +138,7 @@
       copyBtn.disabled = true;
       resultText.value = '';
       lastDecodedValue = '';
-      setStatus(mode === 'camera' ? '正在请求摄像头权限……' : '正在请求屏幕共享权限……');
+      setStatus(mode === 'camera' ? '正在请求摄像头权限，请稍候……' : '正在请求屏幕共享权限，请稍候……');
 
       activeStream = mode === 'camera' ? await startCamera() : await startScreenShare();
       video.srcObject = activeStream;
@@ -148,11 +148,11 @@
         track.addEventListener('ended', stop);
       });
 
-      setStatus(mode === 'camera' ? '正在扫描摄像头画面中的二维码……' : '正在扫描共享屏幕中的二维码……');
+      setStatus(mode === 'camera' ? '正在识别摄像头画面中的二维码……' : '正在识别共享屏幕中的二维码……');
       startScanLoop();
     } catch (error) {
       stop();
-      setStatus(error?.message || '启动失败。请检查浏览器权限与 HTTPS 环境。', 'error');
+      setStatus(error?.message || '启动失败，请检查浏览器授权和 HTTPS 环境后重试。', 'error');
     }
   }
 
@@ -170,7 +170,7 @@
 
     if (video) video.srcObject = null;
     setControls(false);
-    if (!resultText.value) setStatus('扫描已停止。');
+    if (!resultText.value) setStatus('已停止识别。');
   }
 
   async function copyResult() {
@@ -191,9 +191,9 @@
         document.execCommand('copy');
         temp.remove();
       }
-      setStatus('已复制到剪贴板。', 'success');
+      setStatus('已复制成功，快去粘贴吧。', 'success');
     } catch {
-      setStatus('复制失败。请手动选中识别结果复制。', 'error');
+      setStatus('复制失败，请手动选中结果后复制。', 'error');
     }
   }
 
