@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>singledeviceDFTFA</title>
+  <link rel="stylesheet" href="./assets/styles.css" />
+</head>
+<body>
+  <main class="page-shell landing">
+    <section class="hero-card">
+      <p class="eyebrow">singledeviceDFTFA</p>
+      <h1>请选择使用场景</h1>
+      <p class="lead">移动端通过摄像头扫描二维码；PC端通过屏幕共享识别屏幕中的二维码。识别结果仅在本地浏览器处理，不上传到服务器。</p>
+
+      <div class="choice-grid" aria-label="选择设备类型">
+        <a class="choice-card" href="./mobile.html">
+          <span class="choice-icon">📱</span>
+          <span class="choice-title">移动端</span>
+          <span class="choice-text">调用后置摄像头扫描二维码，并复制二维码中的链接。</span>
+        </a>
+        <a class="choice-card" href="./pc.html">
+          <span class="choice-icon">🖥️</span>
+          <span class="choice-title">PC端</span>
+          <span class="choice-text">调用屏幕共享 API，识别屏幕画面中的二维码，并复制二维码中的链接。</span>
+        </a>
+      </div>
+
+      <p class="note">摄像头、屏幕共享、剪贴板写入需要 HTTPS 环境。通过 GitHub Pages 发布后即可满足该条件。</p>
+    </section>
+  </main>
+</body>
+</html>
