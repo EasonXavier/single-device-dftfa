@@ -18,6 +18,8 @@
   const resultTime = document.getElementById('resultTime');
   const updateNotice = document.getElementById('updateNotice');
   const scanUpdateFlash = document.getElementById('scanUpdateFlash');
+  const previewToggleBtn = document.getElementById('previewToggleBtn');
+  const resultPreviewBody = document.getElementById('resultPreviewBody');
 
   let activeStream = null;
   let scanTimer = null;
@@ -25,6 +27,7 @@
   let scanning = false;
   let lastDecodedValue = '';
   let decodedIndex = 0;
+  let lastCopiedIndex = 0;
   let flashTimer = null;
 
   function setStatus(message, type = '') {
@@ -32,11 +35,71 @@
     statusText.dataset.type = type;
   }
 
+  function idleStateLabel() {
+    return mode === 'camera' ? '摄像头未启动' : '屏幕未共享';
+  }
+
+  function scanningStateLabel() {
+    return mode === 'camera' ? '正在扫描' : '正在识别';
+  }
+
   function setControls(isScanning) {
     startBtn.disabled = isScanning;
     stopBtn.disabled = !isScanning;
     scannerFrame?.classList.toggle('is-scanning', isScanning);
-    if (cameraState) cameraState.textContent = isScanning ? '正在扫描' : '摄像头未启动';
+    if (cameraState) cameraState.textContent = isScanning ? scanningStateLabel() : idleStateLabel();
+  }
+
+  function setPreviewExpanded(expanded) {
+    if (!previewToggleBtn || !resultPreviewBody) return;
+    previewToggleBtn.setAttribute('aria-expanded', String(expanded));
+    previewToggleBtn.textContent = expanded ? '收起链接内容' : '展开链接内容';
+    resultPreviewBody.hidden = !expanded;
+  }
+
+  function setCopyState(state) {
+    copyBtn.dataset.copyState = state;
+
+    switch (state) {
+      case 'new':
+        copyBtn.disabled = false;
+        copyBtn.textContent = '复制新识别结果';
+        copyBtn.title = '已识别到新结果，但尚未复制';
+        break;
+      case 'valid':
+        copyBtn.disabled = false;
+        copyBtn.textContent = '已复制 · 当前仍有效';
+        copyBtn.title = '当前 Index 已复制，二维码尚未更新';
+        break;
+      case 'updated':
+        copyBtn.disabled = false;
+        copyBtn.textContent = '二维码已更新 · 复制最新结果';
+        copyBtn.title = '二维码已经更新，最新 Index 尚未复制';
+        break;
+      default:
+        copyBtn.disabled = true;
+        copyBtn.textContent = '等待识别结果';
+        copyBtn.title = '识别到二维码后即可复制';
+    }
+  }
+
+  function refreshCopyState() {
+    if (!decodedIndex) {
+      setCopyState('empty');
+      return;
+    }
+
+    if (lastCopiedIndex === decodedIndex) {
+      setCopyState('valid');
+      return;
+    }
+
+    if (decodedIndex === 1 && lastCopiedIndex === 0) {
+      setCopyState('new');
+      return;
+    }
+
+    setCopyState('updated');
   }
 
   function isProbablyUrl(value) {
@@ -61,7 +124,7 @@
     }).format(date);
   }
 
-  function announceUpdate(indexLabel, updatedAt) {
+  function announceUpdate(indexLabel, updatedAt, isFirstResult) {
     const timestamp = formatClock(updatedAt);
 
     if (previewIndex) previewIndex.textContent = `Index ${indexLabel}`;
@@ -71,8 +134,10 @@
       resultTime.dateTime = updatedAt.toISOString();
     }
     if (updateNotice) {
-      updateNotice.textContent = `二维码已更新至 Index ${indexLabel}`;
-      updateNotice.dataset.state = 'updated';
+      updateNotice.textContent = isFirstResult
+        ? `识别到新结果 Index ${indexLabel}，尚未复制`
+        : `二维码已更新至 Index ${indexLabel}，尚未复制`;
+      updateNotice.dataset.state = isFirstResult ? 'new' : 'updated';
     }
     if (cameraState) cameraState.textContent = '检测到新二维码';
 
@@ -86,7 +151,7 @@
     flashTimer = window.setTimeout(() => {
       scannerFrame?.classList.remove('has-update');
       scanUpdateFlash?.classList.remove('is-visible');
-      if (cameraState && scanning) cameraState.textContent = '正在扫描';
+      if (cameraState && scanning) cameraState.textContent = scanningStateLabel();
     }, 1400);
 
     if (navigator.vibrate) navigator.vibrate(70);
@@ -97,28 +162,20 @@
     if (!normalized || normalized === lastDecodedValue) return;
 
     lastDecodedValue = normalized;
-    copyBtn.disabled = false;
+    decodedIndex += 1;
 
-    if (mode === 'camera') {
-      decodedIndex += 1;
-      const indexLabel = formatIndex(decodedIndex);
-      const updatedAt = new Date();
-      resultText.value = `Index ${indexLabel}｜${normalized}`;
-      announceUpdate(indexLabel, updatedAt);
+    const indexLabel = formatIndex(decodedIndex);
+    const updatedAt = new Date();
 
-      if (isProbablyUrl(normalized)) {
-        setStatus(`二维码内容已更新，当前有效标记为 Index ${indexLabel}。`, 'success');
-      } else {
-        setStatus(`已识别新的二维码内容，当前标记为 Index ${indexLabel}；内容不是网页链接。`, 'warning');
-      }
-      return;
-    }
+    resultText.value = `Index ${indexLabel}｜${normalized}`;
+    if (previewToggleBtn) previewToggleBtn.disabled = false;
+    refreshCopyState();
+    announceUpdate(indexLabel, updatedAt, decodedIndex === 1);
 
-    resultText.value = normalized;
     if (isProbablyUrl(normalized)) {
-      setStatus('识别成功，已为你准备好可复制的链接。', 'success');
+      setStatus(`二维码内容已更新，当前有效标记为 Index ${indexLabel}。`, 'success');
     } else {
-      setStatus('已识别二维码内容。它不是网页链接，但你仍可直接复制原文。', 'warning');
+      setStatus(`已识别新的二维码内容，当前标记为 Index ${indexLabel}；内容不是网页链接。`, 'warning');
     }
   }
 
@@ -207,13 +264,15 @@
   async function start() {
     try {
       setControls(true);
-      copyBtn.disabled = true;
-      resultText.value = '';
-      lastDecodedValue = '';
+      refreshCopyState();
+
       if (updateNotice) {
-        updateNotice.textContent = '正在等待新的二维码';
+        updateNotice.textContent = decodedIndex
+          ? `继续监测二维码更新，当前为 Index ${formatIndex(decodedIndex)}`
+          : '正在等待新的二维码';
         updateNotice.dataset.state = 'waiting';
       }
+
       setStatus(mode === 'camera' ? '正在请求摄像头权限，请稍候……' : '正在请求屏幕共享权限，请稍候……');
 
       activeStream = mode === 'camera' ? await startCamera() : await startScreenShare();
@@ -246,12 +305,19 @@
 
     if (video) video.srcObject = null;
     setControls(false);
-    if (!resultText.value) setStatus('已停止识别。');
+    refreshCopyState();
+
+    if (decodedIndex) {
+      setStatus(`已停止识别，最新结果 Index ${formatIndex(decodedIndex)} 已保留。`);
+    } else {
+      setStatus('已停止识别。');
+    }
   }
 
   async function copyResult() {
     const value = resultText.value.trim();
-    if (!value) return;
+    const copiedIndex = decodedIndex;
+    if (!value || !copiedIndex) return;
 
     try {
       if (navigator.clipboard?.writeText) {
@@ -267,16 +333,35 @@
         document.execCommand('copy');
         temp.remove();
       }
-      setStatus(mode === 'camera' ? '已复制带 Index 的结果。' : '已复制成功。', 'success');
+
+      lastCopiedIndex = Math.max(lastCopiedIndex, copiedIndex);
+      refreshCopyState();
+
+      if (copiedIndex === decodedIndex) {
+        const indexLabel = formatIndex(copiedIndex);
+        if (updateNotice) {
+          updateNotice.textContent = `Index ${indexLabel} 已复制，二维码未更新，当前仍有效`;
+          updateNotice.dataset.state = 'copied';
+        }
+        setStatus(`Index ${indexLabel} 已复制，当前二维码尚未更新。`, 'success');
+      } else {
+        setStatus('复制完成，但识别期间二维码已再次更新，请复制最新 Index。', 'warning');
+      }
     } catch {
-      setStatus('复制失败，请手动选中结果后复制。', 'error');
+      setStatus('复制失败，请展开链接内容后手动复制。', 'error');
     }
   }
 
   startBtn.addEventListener('click', start);
   stopBtn.addEventListener('click', stop);
   copyBtn.addEventListener('click', copyResult);
+  previewToggleBtn?.addEventListener('click', () => {
+    const expanded = previewToggleBtn.getAttribute('aria-expanded') === 'true';
+    setPreviewExpanded(!expanded);
+  });
 
+  setPreviewExpanded(false);
+  refreshCopyState();
   window.addEventListener('beforeunload', stop);
   initDetector();
 })();

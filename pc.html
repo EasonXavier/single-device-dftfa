@@ -2,36 +2,73 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#08111f" />
+  <meta name="application-version" content="1.2.0" />
   <title>PC端扫码 - singledeviceDFTFA</title>
   <link rel="stylesheet" href="./assets/styles.css" />
+  <link rel="stylesheet" href="./assets/result-state.css" />
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js" defer></script>
   <script src="./assets/qr-scanner.js" defer></script>
 </head>
 <body data-mode="screen">
-  <main class="page-shell">
-    <section class="tool-card">
-      <nav class="top-nav"><a href="./index.html">返回首页</a></nav>
-      <p class="eyebrow">电脑识别模式</p>
-      <h1>共享屏幕后识别二维码</h1>
-      <p class="lead">点击“开始识别”后，选择包含二维码的窗口、标签页或整个屏幕，即可自动识别。</p>
+  <main class="page-shell mobile-page">
+    <section class="tool-card mobile-tool-card">
+      <header class="tool-header">
+        <nav class="top-nav">
+          <a href="./index.html" aria-label="返回首页">← 返回首页</a>
+          <span class="version-badge">v1.2.0 · 2026-07-14</span>
+        </nav>
+        <div>
+          <p class="eyebrow">电脑识别模式</p>
+          <h1>识别动态二维码</h1>
+          <p class="lead">共享包含二维码的窗口、标签页或整个屏幕。二维码内容变化后会生成新的 Index，请以预览区、结果区和复制按钮状态判断最新链接是否已复制及是否仍然有效。</p>
+        </div>
+      </header>
 
-      <div class="scanner-frame wide">
-        <video id="preview" playsinline muted></video>
-        <div class="scan-mask" aria-hidden="true"></div>
+      <div class="scanner-workspace">
+        <section class="scanner-column" aria-label="屏幕二维码识别区">
+          <div class="scanner-frame camera-frame screen-frame" id="scannerFrame">
+            <video id="preview" playsinline muted style="object-fit: contain;"></video>
+            <div class="scan-mask" aria-hidden="true"></div>
+            <div class="scanner-hud" aria-hidden="true">
+              <span id="cameraState" class="camera-state">屏幕未共享</span>
+              <span id="previewIndex" class="preview-index">Index --</span>
+            </div>
+            <div id="scanUpdateFlash" class="scan-update-flash" aria-hidden="true"></div>
+          </div>
+
+          <div class="controls compact-controls">
+            <button id="startBtn" type="button">开始识别</button>
+            <button id="stopBtn" type="button" class="secondary" disabled>结束识别</button>
+          </div>
+        </section>
+
+        <section class="result-panel result-column" aria-live="polite" aria-atomic="true">
+          <div class="result-heading">
+            <div>
+              <p class="result-kicker">最新识别结果</p>
+              <h2 id="resultIndex">Index --</h2>
+            </div>
+            <time id="resultTime" class="result-time" datetime="">尚未更新</time>
+          </div>
+
+          <div id="updateNotice" class="update-notice" role="status">
+            等待二维码更新
+          </div>
+
+          <div class="result-preview">
+            <button id="previewToggleBtn" class="preview-toggle" type="button" aria-expanded="false" aria-controls="resultPreviewBody" disabled>展开链接内容</button>
+            <div id="resultPreviewBody" class="result-preview-body" hidden>
+              <label for="resultText">带 Index 的链接</label>
+              <textarea id="resultText" readonly placeholder="识别成功后，将显示“Index 001｜链接”。"></textarea>
+            </div>
+          </div>
+
+          <p id="statusText" class="status">准备就绪，点击“开始识别”。</p>
+          <button id="copyBtn" type="button" data-copy-state="empty" disabled>等待识别结果</button>
+        </section>
       </div>
-
-      <div class="controls">
-        <button id="startBtn" type="button">开始识别</button>
-        <button id="stopBtn" type="button" class="secondary" disabled>结束识别</button>
-      </div>
-
-      <section class="result-panel" aria-live="polite">
-        <label for="resultText">识别结果</label>
-        <textarea id="resultText" readonly placeholder="识别成功后，内容会显示在这里。"></textarea>
-        <p id="statusText" class="status">准备就绪，点击“开始识别”。</p>
-        <button id="copyBtn" type="button" disabled>复制结果</button>
-      </section>
 
       <canvas id="scanCanvas" hidden></canvas>
     </section>
