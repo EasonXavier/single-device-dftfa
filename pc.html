@@ -4,9 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#08111f" />
-  <meta name="application-version" content="1.1.0" />
+  <meta name="application-version" content="1.2.0" />
   <title>PC端扫码 - singledeviceDFTFA</title>
   <link rel="stylesheet" href="./assets/styles.css" />
+  <link rel="stylesheet" href="./assets/result-state.css" />
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js" defer></script>
   <script src="./assets/qr-scanner.js" defer></script>
 </head>
@@ -16,12 +17,12 @@
       <header class="tool-header">
         <nav class="top-nav">
           <a href="./index.html" aria-label="返回首页">← 返回首页</a>
-          <span class="preview-index" style="margin-left: 10px;">v1.1.0 · 2026-07-14</span>
+          <span class="version-badge">v1.2.0 · 2026-07-14</span>
         </nav>
         <div>
           <p class="eyebrow">电脑识别模式</p>
           <h1>识别动态二维码</h1>
-          <p class="lead">共享包含二维码的窗口、标签页或整个屏幕。二维码内容变化后会生成新的 Index，请以预览区和结果区显示的最新 Index 判断链接是否仍在有效期内。</p>
+          <p class="lead">共享包含二维码的窗口、标签页或整个屏幕。二维码内容变化后会生成新的 Index，请以预览区、结果区和复制按钮状态判断最新链接是否已复制及是否仍然有效。</p>
         </div>
       </header>
 
@@ -56,10 +57,16 @@
             等待二维码更新
           </div>
 
-          <label for="resultText">带 Index 的链接</label>
-          <textarea id="resultText" readonly placeholder="识别成功后，将显示“Index 001｜链接”。"></textarea>
+          <div class="result-preview">
+            <button id="previewToggleBtn" class="preview-toggle" type="button" aria-expanded="false" aria-controls="resultPreviewBody" disabled>展开链接内容</button>
+            <div id="resultPreviewBody" class="result-preview-body" hidden>
+              <label for="resultText">带 Index 的链接</label>
+              <textarea id="resultText" readonly placeholder="识别成功后，将显示“Index 001｜链接”。"></textarea>
+            </div>
+          </div>
+
           <p id="statusText" class="status">准备就绪，点击“开始识别”。</p>
-          <button id="copyBtn" type="button" disabled>复制带 Index 的结果</button>
+          <button id="copyBtn" type="button" data-copy-state="empty" disabled>等待识别结果</button>
         </section>
       </div>
 
