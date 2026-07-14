@@ -11,11 +11,21 @@
   if (!mode || !video || !canvas || !startBtn || !stopBtn || !copyBtn || !resultText || !statusText) return;
 
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  const scannerFrame = document.getElementById('scannerFrame');
+  const cameraState = document.getElementById('cameraState');
+  const previewIndex = document.getElementById('previewIndex');
+  const resultIndex = document.getElementById('resultIndex');
+  const resultTime = document.getElementById('resultTime');
+  const updateNotice = document.getElementById('updateNotice');
+  const scanUpdateFlash = document.getElementById('scanUpdateFlash');
+
   let activeStream = null;
   let scanTimer = null;
   let detector = null;
   let scanning = false;
   let lastDecodedValue = '';
+  let decodedIndex = 0;
+  let flashTimer = null;
 
   function setStatus(message, type = '') {
     statusText.textContent = message;
@@ -25,6 +35,8 @@
   function setControls(isScanning) {
     startBtn.disabled = isScanning;
     stopBtn.disabled = !isScanning;
+    scannerFrame?.classList.toggle('is-scanning', isScanning);
+    if (cameraState) cameraState.textContent = isScanning ? '正在扫描' : '摄像头未启动';
   }
 
   function isProbablyUrl(value) {
@@ -36,13 +48,73 @@
     }
   }
 
+  function formatIndex(index) {
+    return String(index).padStart(3, '0');
+  }
+
+  function formatClock(date) {
+    return new Intl.DateTimeFormat('zh-CN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    }).format(date);
+  }
+
+  function announceUpdate(indexLabel, updatedAt) {
+    const timestamp = formatClock(updatedAt);
+
+    if (previewIndex) previewIndex.textContent = `Index ${indexLabel}`;
+    if (resultIndex) resultIndex.textContent = `Index ${indexLabel}`;
+    if (resultTime) {
+      resultTime.textContent = `${timestamp} 更新`;
+      resultTime.dateTime = updatedAt.toISOString();
+    }
+    if (updateNotice) {
+      updateNotice.textContent = `二维码已更新至 Index ${indexLabel}`;
+      updateNotice.dataset.state = 'updated';
+    }
+    if (cameraState) cameraState.textContent = '检测到新二维码';
+
+    scannerFrame?.classList.remove('has-update');
+    scanUpdateFlash?.classList.remove('is-visible');
+    void scannerFrame?.offsetWidth;
+    scannerFrame?.classList.add('has-update');
+    scanUpdateFlash?.classList.add('is-visible');
+
+    if (flashTimer) window.clearTimeout(flashTimer);
+    flashTimer = window.setTimeout(() => {
+      scannerFrame?.classList.remove('has-update');
+      scanUpdateFlash?.classList.remove('is-visible');
+      if (cameraState && scanning) cameraState.textContent = '正在扫描';
+    }, 1400);
+
+    if (navigator.vibrate) navigator.vibrate(70);
+  }
+
   function setResult(value) {
     const normalized = value.trim();
     if (!normalized || normalized === lastDecodedValue) return;
+
     lastDecodedValue = normalized;
-    resultText.value = normalized;
     copyBtn.disabled = false;
 
+    if (mode === 'camera') {
+      decodedIndex += 1;
+      const indexLabel = formatIndex(decodedIndex);
+      const updatedAt = new Date();
+      resultText.value = `Index ${indexLabel}｜${normalized}`;
+      announceUpdate(indexLabel, updatedAt);
+
+      if (isProbablyUrl(normalized)) {
+        setStatus(`二维码内容已更新，当前有效标记为 Index ${indexLabel}。`, 'success');
+      } else {
+        setStatus(`已识别新的二维码内容，当前标记为 Index ${indexLabel}；内容不是网页链接。`, 'warning');
+      }
+      return;
+    }
+
+    resultText.value = normalized;
     if (isProbablyUrl(normalized)) {
       setStatus('识别成功，已为你准备好可复制的链接。', 'success');
     } else {
@@ -138,6 +210,10 @@
       copyBtn.disabled = true;
       resultText.value = '';
       lastDecodedValue = '';
+      if (updateNotice) {
+        updateNotice.textContent = '正在等待新的二维码';
+        updateNotice.dataset.state = 'waiting';
+      }
       setStatus(mode === 'camera' ? '正在请求摄像头权限，请稍候……' : '正在请求屏幕共享权限，请稍候……');
 
       activeStream = mode === 'camera' ? await startCamera() : await startScreenShare();
@@ -191,7 +267,7 @@
         document.execCommand('copy');
         temp.remove();
       }
-      setStatus('已复制成功，快去粘贴吧。', 'success');
+      setStatus(mode === 'camera' ? '已复制带 Index 的结果。' : '已复制成功。', 'success');
     } catch {
       setStatus('复制失败，请手动选中结果后复制。', 'error');
     }
