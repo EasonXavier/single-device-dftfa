@@ -2,7 +2,7 @@
   display: inline-flex;
   align-items: center;
   min-height: 32px;
-  margin-left: 10px;
+  margin-left: auto;
   padding: 6px 10px;
   border: 1px solid rgba(147, 197, 253, 0.36);
   border-radius: 999px;
@@ -127,6 +127,9 @@
 }
 
 @media (max-width: 430px) {
+  .top-nav { align-items: flex-start; flex-wrap: wrap; }
+  .version-badge { margin-left: auto; }
+
   .version-badge {
     max-width: 170px;
     overflow: hidden;
