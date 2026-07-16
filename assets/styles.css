@@ -344,7 +344,12 @@ textarea:focus { border-color: rgba(96, 165, 250, 0.7); }
 }
 
 .tool-header .top-nav { margin: 0; }
-.tool-header h1 { font-size: clamp(28px, 4.2vw, 46px); }
+.tool-header h1 {
+  font-family: var(--app-text-font);
+  font-size: clamp(28px, 4.2vw, 46px);
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
 .tool-header .lead { margin-top: 12px; max-width: 800px; }
 
 .scanner-workspace {
