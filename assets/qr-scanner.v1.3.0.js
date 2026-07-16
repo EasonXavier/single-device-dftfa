@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = '1.2.1';
+  const APP_VERSION = window.SINGLEDEVICE_DFTFA_VERSION?.number || 'unknown';
   const mode = document.body.dataset.mode;
   const video = document.getElementById('preview');
   const canvas = document.getElementById('scanCanvas');
