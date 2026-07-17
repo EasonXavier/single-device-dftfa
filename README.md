@@ -2,7 +2,7 @@
 
 ## Version
 
-Current version: `1.5.2`. See [VERSIONING.md](./VERSIONING.md) for the `a.b.c` increment policy.
+Current version: `1.5.3`. See [VERSIONING.md](./VERSIONING.md) for the `a.b.c` increment policy.
 
 一个面向日常使用的前端二维码识别工具：
 
@@ -13,7 +13,7 @@ Current version: `1.5.2`. See [VERSIONING.md](./VERSIONING.md) for the `a.b.c` i
 - 识别结果正文默认折叠，可按需展开；复制按钮通过蓝、绿、橙三种状态提示是否待复制、已复制有效或二维码已经更新。
 - 复制内容采用 `Index 001｜二维码内容` 格式。
 
-当前网页版本：`v1.5.2`（2026-07-17）。
+当前网页版本：`v1.5.3`（2026-07-17）。
 
 ## 文件结构
 
@@ -23,6 +23,7 @@ singledeviceDFTFA/
 ├── mobile.html
 ├── pc.html
 ├── assets/
+│   ├── capture-context.v1.5.3.js
 │   ├── styles.css
 │   ├── result-state.css
 │   └── qr-scanner.js
@@ -44,7 +45,7 @@ python3 -m http.server 8080
 http://localhost:8080
 ```
 
-浏览器一般把 `localhost` 视为安全上下文，因此可用于测试摄像头、屏幕共享和剪贴板功能。正式使用建议部署到 HTTPS 环境。
+浏览器一般把 `localhost` 视为安全上下文，因此可用于测试摄像头、屏幕共享和剪贴板功能。正式使用必须通过 HTTPS 提供页面。
 
 ## GitHub Pages 发布
 
@@ -59,9 +60,12 @@ http://localhost:8080
 https://你的GitHub用户名.github.io/singledeviceDFTFA/
 ```
 
+使用自定义域名时，应在承载用户站点的仓库中配置域名，并在 GitHub Pages 设置中启用 `Enforce HTTPS`。本工具会将非本地的 HTTP 访问自动切换到同地址的 HTTPS 版本。
+
 ## 注意事项
 
-- 摄像头、屏幕共享和剪贴板写入依赖浏览器权限。
+- 摄像头、屏幕共享和剪贴板写入依赖安全上下文及浏览器权限。
+- PC 端屏幕共享必须在顶层页面中由用户点击触发；iframe 或禁止 `display-capture` 的 `Permissions-Policy` 会阻止调用。
 - PC 端屏幕共享 API 在部分移动浏览器中不可用。
 - 二维码识别优先使用浏览器原生 `BarcodeDetector`；不支持时使用异步加载的 `jsQR` CDN fallback。CDN 加载失败不会阻塞摄像头或屏幕共享按钮初始化。
 - 识别过程在本地浏览器中完成，不包含任何后端上传逻辑。
