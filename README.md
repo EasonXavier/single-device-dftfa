@@ -2,7 +2,7 @@
 
 ## Version
 
-Current version: `1.5.1`. See [VERSIONING.md](./VERSIONING.md) for the `a.b.c` increment policy.
+Current version: `1.5.2`. See [VERSIONING.md](./VERSIONING.md) for the `a.b.c` increment policy.
 
 一个面向日常使用的前端二维码识别工具：
 
@@ -13,7 +13,7 @@ Current version: `1.5.1`. See [VERSIONING.md](./VERSIONING.md) for the `a.b.c` i
 - 识别结果正文默认折叠，可按需展开；复制按钮通过蓝、绿、橙三种状态提示是否待复制、已复制有效或二维码已经更新。
 - 复制内容采用 `Index 001｜二维码内容` 格式。
 
-当前网页版本：`v1.5.1`（2026-07-17）。
+当前网页版本：`v1.5.2`（2026-07-17）。
 
 ## 文件结构
 
@@ -63,5 +63,5 @@ https://你的GitHub用户名.github.io/singledeviceDFTFA/
 
 - 摄像头、屏幕共享和剪贴板写入依赖浏览器权限。
 - PC 端屏幕共享 API 在部分移动浏览器中不可用。
-- 二维码识别优先使用浏览器原生 `BarcodeDetector`；不支持时使用 `jsQR` CDN 作为 fallback。
+- 二维码识别优先使用浏览器原生 `BarcodeDetector`；不支持时使用异步加载的 `jsQR` CDN fallback。CDN 加载失败不会阻塞摄像头或屏幕共享按钮初始化。
 - 识别过程在本地浏览器中完成，不包含任何后端上传逻辑。
