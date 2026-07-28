@@ -3,7 +3,7 @@
 ## Operation
 
 - Operation ID: `repo-rename-2026-07-29-single-device-dftfa`
-- Status: `prepared`
+- Status: `renamed; deployment verification pending`
 - Repository ID: `1227244603`
 - Default branch: `main`
 - Visibility: `public`
@@ -32,6 +32,15 @@
 3. Update `origin` to the new repository URL.
 4. Append the actual rename time, commits, and verification evidence to this file.
 5. Push the completion record to trigger a Pages deployment and verify the new URL.
+
+## Execution record
+
+- Preparation commit: `4a2d72b`
+- Renamed at: `2026-07-29T07:23:13+08:00` (`2026-07-28T23:23:13Z`)
+- Rename API result: `EasonXavier/single-device-dftfa`
+- Repository ID after rename: `1227244603`
+- Local origin after rename: `https://github.com/EasonXavier/single-device-dftfa.git`
+- Completion commit: recorded by the commit containing this execution update.
 
 ## Rollback
 
