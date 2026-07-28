@@ -18,7 +18,7 @@ Current version: `1.5.3`. See [VERSIONING.md](./VERSIONING.md) for the `a.b.c` i
 ## 文件结构
 
 ```text
-singledeviceDFTFA/
+single-device-dftfa/
 ├── index.html
 ├── mobile.html
 ├── pc.html
@@ -35,7 +35,7 @@ singledeviceDFTFA/
 推荐使用本地静态服务器测试：
 
 ```bash
-cd singledeviceDFTFA
+cd single-device-dftfa
 python3 -m http.server 8080
 ```
 
@@ -49,7 +49,7 @@ http://localhost:8080
 
 ## GitHub Pages 发布
 
-1. 在 GitHub 新建仓库，仓库名填写：`singledeviceDFTFA`。
+1. 在 GitHub 新建仓库，仓库名填写：`single-device-dftfa`。
 2. 上传本项目根目录下的全部文件。
 3. 进入仓库 `Settings` → `Pages`。
 4. `Build and deployment` 选择 `Deploy from a branch`。
@@ -57,7 +57,7 @@ http://localhost:8080
 6. 等待 Pages 构建完成后，访问：
 
 ```text
-https://你的GitHub用户名.github.io/singledeviceDFTFA/
+https://你的GitHub用户名.github.io/single-device-dftfa/
 ```
 
 使用自定义域名时，应在承载用户站点的仓库中配置域名，并在 GitHub Pages 设置中启用 `Enforce HTTPS`。本工具会将非本地的 HTTP 访问自动切换到同地址的 HTTPS 版本。
