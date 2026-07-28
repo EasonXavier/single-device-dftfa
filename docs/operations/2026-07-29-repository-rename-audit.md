@@ -3,7 +3,7 @@
 ## Operation
 
 - Operation ID: `repo-rename-2026-07-29-single-device-dftfa`
-- Status: `renamed; deployment verification pending`
+- Status: `completed`
 - Repository ID: `1227244603`
 - Default branch: `main`
 - Visibility: `public`
@@ -40,7 +40,16 @@
 - Rename API result: `EasonXavier/single-device-dftfa`
 - Repository ID after rename: `1227244603`
 - Local origin after rename: `https://github.com/EasonXavier/single-device-dftfa.git`
-- Completion commit: recorded by the commit containing this execution update.
+- Rename-record commit: `a169304`
+
+## Verification
+
+- Verified at: `2026-07-29T07:24:00+08:00` (`2026-07-28T23:24:00Z`)
+- Repository metadata: `EasonXavier/single-device-dftfa`, ID `1227244603`, default branch `main`
+- New Pages URL: `https://easonx.me/single-device-dftfa/`
+- HTTP result: `200`
+- Content marker: `<title>singledeviceDFTFA</title>`
+- Result: `PASS`
 
 ## Rollback
 
